@@ -1,0 +1,7 @@
+flask
+Flask-Script
+Flask-Session
+Flask-Migrate
+SQLAlchemy
+Flask-SQLAlchemy
+psycopg2-binary
