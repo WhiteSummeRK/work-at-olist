@@ -1,7 +1,8 @@
 flask
-Flask-Script
-Flask-Session
+flask-marshmallow
 Flask-Migrate
-SQLAlchemy
 Flask-SQLAlchemy
+marshmallow-sqlalchemy
+SQLAlchemy
 psycopg2-binary
+tox
