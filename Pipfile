@@ -6,13 +6,16 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+marshmallow = "*"
+flask-marshmallow = "*"
+flask-sqlalchemy = "*"
+marshmallow-sqlalchemy = "*"
 psycopg2-binary = "*"
+tox = "*"
 Flask = "*"
-Flask-Script = "*"
-Flask-Session = "*"
 Flask-Migrate = "*"
+Flask-Testing = "*"
 SQLAlchemy = "*"
-Flask-SQLAlchemy = "*"
 
 [requires]
 python_version = "3.6"

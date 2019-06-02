@@ -1,5 +1,5 @@
 from flask_marshmallow import Marshmallow
-from marshmallow import fields, validates, ValidationError, validates_schema
+from marshmallow import validates, ValidationError, validates_schema, fields
 from call_receiver.models import CallReceiver
 
 
@@ -14,7 +14,7 @@ class PhoneCallReceive(ma.ModelSchema):
     class Meta:
         model = CallReceiver
 
-    record_type = fields.Str(required=True)
+    record_type = fields.Int(required=True)
     record_timestamp = fields.Str(required=True)
     call_identifier = fields.Int(required=True)
     origin_phone = fields.Str(required=True)
