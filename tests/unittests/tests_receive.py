@@ -1,6 +1,8 @@
-from tests_class import BaseRouteTests
 from flask import url_for
 from datetime import datetime
+from unittest.mock import patch
+
+from tests_class import BaseRouteTests
 
 
 class TestsReceiveRoute(BaseRouteTests):
@@ -9,14 +11,13 @@ class TestsReceiveRoute(BaseRouteTests):
             url_for('receive.receive_data'),
             json={
                 "origin_phone": '12312312345',
-                "dest_phone": '123123123123'}
+                "dest_phone": '12312312312'}
         )
 
         expected = {
-            'record_timestamp': "['Missing data for required field.']",
-            'record_type': "['Missing data for required field.']"
+            'record_timestamp': ['Missing data for required field.'],
+            'record_type': ['Missing data for required field.']
         }
-
         self.assertEqual(request.status_code, 400)
         self.assertEqual(request.json['record_timestamp'],
                          expected['record_timestamp'])
@@ -28,7 +29,7 @@ class TestsReceiveRoute(BaseRouteTests):
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
-                'record_type': '10',
+                'record_type': 0,
                 'record_timestamp': test,
                 'call_identifier': 30,
                 'origin_phone': '1231231231',
@@ -36,7 +37,7 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
         expected = {
-            'dest_phone': "['Error: dest_phone format is incorrect']"
+            'dest_phone': ['Error: dest_phone format is incorrect']
         }
 
         self.assertEqual(request.status_code, 400)
@@ -47,7 +48,7 @@ class TestsReceiveRoute(BaseRouteTests):
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
-                'record_type': '10',
+                'record_type': 1,
                 'record_timestamp': test,
                 'call_identifier': 30,
                 'origin_phone': '0',
@@ -55,7 +56,7 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
         expected = {
-            'origin_phone': "['Error: origin_phone format is incorrect']"
+            'origin_phone': ['Error: origin_phone format is incorrect']
         }
 
         self.assertEqual(request.status_code, 400)
@@ -69,11 +70,24 @@ class TestsReceiveRoute(BaseRouteTests):
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
-                'record_type': '10',
+                'record_type': 0,
                 'record_timestamp': test,
                 'call_identifier': 30,
                 'origin_phone': '1234567891',
                 'dest_phone': '12345678911'}
         )
-
         self.assertEqual(request.status_code, 201)
+
+    @patch('call_receiver.controllers.routes.receive.save_call')
+    def tests_receive_data_should_call_sqlalchemy(self, save_mock):
+        test = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        request = self.client.post(
+            url_for('receive.receive_data'),
+            json={
+                'record_type': 1,
+                'record_timestamp': test,
+                'call_identifier': 30,
+                'origin_phone': '1234567891',
+                'dest_phone': '12345678911'}
+        )
+        self.assertTrue(save_mock.called)

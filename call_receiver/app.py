@@ -5,9 +5,6 @@ from flask_migrate import Migrate
 
 
 def create_app():
-    # imports
-
-    # Flask application and needed setups
     app = Flask(__name__)
 
     app.config['SESSION_TYPE'] = 'filesystem'
