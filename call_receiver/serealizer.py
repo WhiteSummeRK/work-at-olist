@@ -28,3 +28,10 @@ class PhoneCallReceive(ma.ModelSchema):
         if len(data['origin_phone']) not in [10, 11]:
             raise ValidationError("Error: origin_phone format is incorrect",
                                   "origin_phone")
+
+    @validates('record_type')
+    def validate_record_type(self, value):
+        if value not in [0, 1]:
+            raise ValidationError(
+                "Please, record_type is 1 for start call and 0 for end call",
+                "record_type")
