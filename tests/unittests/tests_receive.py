@@ -37,7 +37,7 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
         expected = {
-            'dest_phone': ['Error: dest_phone format is incorrect']
+            'dest_phone': ['Err: dest_phone should be min=10 and max=11']
         }
 
         self.assertEqual(request.status_code, 400)
@@ -48,7 +48,7 @@ class TestsReceiveRoute(BaseRouteTests):
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
-                'record_type': 1,
+                'record_type': 0,
                 'record_timestamp': date,
                 'call_identifier': 30,
                 'origin_phone': '0',
@@ -56,7 +56,7 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
         expected = {
-            'origin_phone': ['Error: origin_phone format is incorrect']
+            'origin_phone': ['Err: origin_phone should be min=10 and max=11']
         }
 
         self.assertEqual(request.status_code, 400)
@@ -84,7 +84,7 @@ class TestsReceiveRoute(BaseRouteTests):
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
-                'record_type': 1,
+                'record_type': 0,
                 'record_timestamp': date,
                 'call_identifier': 30,
                 'origin_phone': '1234567891',
@@ -106,5 +106,67 @@ class TestsReceiveRoute(BaseRouteTests):
         self.assertEqual(request.status_code, 400)
         self.assertEqual(
             request.json['record_type'][0],
-            "Please, record_type is 1 for start call and 0 for end call"
+            "Err: record_type is 0 for start call and 1 for end call"
         )
+
+    def test_respond_400_with_origin_phone_field_and_call_end_record(self):
+        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        request = self.client.post(
+            url_for('receive.receive_data'),
+            json={
+                'record_type': 1,
+                'record_timestamp': date,
+                'call_identifier': 30,
+                'origin_phone': '1234567891'
+            }
+        )
+        self.assertEqual(request.status_code, 400)
+        self.assertEqual(
+            request.json['phone_validation'][0],
+            "Err: Phone numbers are not necessary for end calls"
+        )
+
+    def test_respond_400_with_dest_phone_field_and_call_end_record(self):
+        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        request = self.client.post(
+            url_for('receive.receive_data'),
+            json={
+                'record_type': 1,
+                'record_timestamp': date,
+                'call_identifier': 30,
+                'dest_phone': '1234567891'
+            }
+        )
+        self.assertEqual(request.status_code, 400)
+        self.assertEqual(
+            request.json['phone_validation'][0],
+            "Err: Phone numbers are not necessary for end calls"
+        )
+
+    def test_should_responde_201_when_no_phone_with_end_call(self):
+        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        request = self.client.post(
+            url_for('receive.receive_data'),
+            json={
+                'record_type': 1,
+                'record_timestamp': date,
+                'call_identifier': 30,
+            }
+        )
+        self.assertEqual(request.status_code, 201)
+
+    def test_should_respond_400_when_no_phone_with_start_call(self):
+        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        request = self.client.post(
+            url_for('receive.receive_data'),
+            json={
+                'record_type': 0,
+                'record_timestamp': date,
+                'call_identifier': 30,
+            }
+        )
+
+        expected = 'Err: Please, pass the phone numbers'
+
+        self.assertEqual(request.status_code, 400)
+        self.assertEqual(request.json['phone_validation'][0], expected)

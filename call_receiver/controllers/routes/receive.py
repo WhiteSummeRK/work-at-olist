@@ -1,7 +1,3 @@
-"""
-WIP: Setting up one route for testing the project
-"""
-
 from flask import Blueprint, jsonify, request
 from call_receiver.serealizer import PhoneCallReceive
 from call_receiver.controllers.modules.receive import save_call

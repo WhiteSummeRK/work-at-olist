@@ -1,11 +1,11 @@
-from call_receiver.models import CallReceiver
+from call_receiver.models import CallRecord
 from datetime import datetime
 from flask import current_app
 
 
 def save_call(call_data):
     try:
-        data = CallReceiver(
+        data = CallRecord(
             record_type=call_data['record_type'],
             call_identifier=call_data['call_identifier'],
             record_timestamp=call_data['record_timestamp'],
