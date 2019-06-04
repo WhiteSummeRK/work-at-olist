@@ -13,9 +13,13 @@ def configure(app):
     ma.init_app(app)
 
 
-class PhoneCallReceive(ma.ModelSchema):
+class PhoneCallReceive(ma.Schema):
     class Meta:
-        model = CallRecord
+        fields = ('record_type',
+                  'record_timestamp',
+                  'call_identifier',
+                  'origin_phone',
+                  'dest_phone')
 
     record_type = fields.Int(
         required=True,

@@ -13,26 +13,25 @@ class CallRecord(db.Model):
     __tablename__ = 'call_record'
 
     id = db.Column(db.Integer, primary_key=True)
-    record_type = db.Column(db.Integer, nullable=True)
-    record_timestamp = db.Column(db.DateTime, nullable=True)
-    call_identifier = db.Column(db.Integer, nullable=True)
-    origin_phone = db.Column(db.String(12), nullable=False)
-    dest_phone = db.Column(db.String(12), nullable=False)
+    destination = db.Column(db.String(12), nullable=False)
+    call_start_date = db.Column(db.String(10), nullable=False)
+    call_start_time = db.Column(db.String(10), nullable=False)
+    call_duration = db.Column(db.String(10), nullable=False)
+    call_price = db.Column(db.Float, nullable=False)
+    id_bill = db.Column(db.Integer, db.ForeignKey('bill.id'))
+    bill = db.relationship('Bill')
 
     def __repr__(self):
-        type_to_show = {
-            0: "Call Start Record",
-            1: "Call End Record"
-        }
-
-        return 'CallRecord(record_type={}, record_timestamp={}, \
-        call_identifier={}, origin_phone={}, dest_phone={})'.format(
-            type_to_show[self.record_type], self.record_timestamp,
-            self.call_identifier, self.origin_phone, self.dest_phone
+        return 'CallRecord(destination={}, call_start_date={}, \
+        call_start_time={}, call_duration={}, call_price={})'.format(
+            self.destination, self.call_start_date,
+            self.call_start_time, self.call_duration, self.call_price
         )
 
 
 class Bill(db.Model):
+    __tablename__ = 'bill'
+
     id = db.Column(db.Integer, primary_key=True)
     sub_number = db.Column(db.String(12))
     reference_period = db.Column(db.DateTime, nullable=True)

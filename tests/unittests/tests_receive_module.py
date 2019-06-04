@@ -2,7 +2,10 @@ from unittest import TestCase, mock
 from datetime import datetime
 
 from call_receiver.app import create_app
-from call_receiver.controllers.modules.receive import save_call
+from call_receiver.controllers.modules.receive import (format_date,
+                                                       format_time,
+                                                       calculate_duration,
+                                                       calculate_price)
 
 
 class BaseModulesTest(TestCase):
@@ -16,33 +19,50 @@ class BaseModulesTest(TestCase):
 
         self.app.db.create_all()
 
-        self.default_call = {
-            'record_type': 0,
-            'record_timestamp': datetime.now(),
-            'call_identifier': 30,
-            'origin_phone': '1234567891',
-            'dest_phone': '12345678911'
-        }
-
     def tearDown(self):
         self.app.db.session.remove()
         self.app.db.drop_all()
 
-    @mock.patch('flask.current_app.db.session.add')
-    @mock.patch('flask.current_app.db.session.commit')
-    def test_save_call_should_save_into_database_correctly(self, add, commit):
-        result = save_call(self.default_call)
+    def test_format_date_should_return_correct_date_YYYY_MM_DD(self):
+        date = 1545730073
+        result = format_date(date)
 
-        self.assertEqual(result.record_type, 0)
-        self.assertEqual(result.call_identifier, 30)
-        self.assertEqual(result.origin_phone, '1234567891')
-        self.assertEqual(result.dest_phone, '12345678911')
-        self.assertTrue(add.called)
-        self.assertTrue(commit.called)
+        self.assertEqual(result, '2018/12/25')
 
-    @mock.patch('flask.current_app.db.session.rollback')
-    @mock.patch('flask.current_app.db.session.remove')
-    def test_save_call_should_exc_when_data_is_wrong(self, rollb, remove):
-        result = save_call('Super Magnanimous Test')
-        self.assertTrue(rollb.called)
-        self.assertTrue(remove.called)
+    def test_format_time_should_return_correct_time_YYYY_MM_DD(self):
+        time = 1545730073
+        result = format_time(time)
+
+        self.assertEqual(result, '07:27:53')
+
+    def test_calculate_duration_should_calculate_correctly(self):
+        time_1 = 1545730073
+        time_2 = 1545730173
+
+        expected = '0:01:40'
+
+        result = calculate_duration(time_1, time_2)
+
+        self.assertEqual(result, expected)
+
+    def test_calculate_duration_should_operate_subtracting_lower_nums(self):
+        time_1 = 1545730073
+        time_2 = 1545730173
+
+        expected = '0:01:40'
+
+        result = calculate_duration(time_2, time_1)
+
+        self.assertEqual(result, expected)
+
+    def test_calculate_price_should_return_correct_price(self):
+        time_1 = 1545730073
+        time_2 = 1545730173
+
+        result = calculate_price(
+            calculate_duration(time_1, time_2, return_delta=True),
+            time_1,
+            time_2
+        )
+
+        self.assertEqual(result, 0.45)

@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
 from call_receiver.serealizer import GetBill
-from call_receiver.controllers.modules.receive import save_call
 
 app = Blueprint('bill', __name__)
 
