@@ -23,4 +23,7 @@ def create_app():
     from call_receiver.controllers.routes.receive import app as receive
     app.register_blueprint(receive, url_prefix='/')
 
+    from call_receiver.controllers.routes.bill import app as bill
+    app.register_blueprint(bill, url_prefix='/get_bill')
+
     return app
