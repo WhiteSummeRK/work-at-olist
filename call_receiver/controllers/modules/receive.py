@@ -1,6 +1,9 @@
 """WIP"""
 from datetime import datetime
 from decimal import Decimal
+from flask import current_app
+
+from call_receiver.models import CallRecord
 
 STANDING_CHARGE = 0.36
 BEFORE_22_CHARGE = 0.09
@@ -44,3 +47,38 @@ def calculate_price(duration, time_1, time_2):
         ))
 
     return STANDING_CHARGE
+
+
+def save_call(data):
+    """
+    Receives de data passed by marshmallow and use the module functions
+    to save it into the database
+
+        data -> Marshmallow result json
+    """
+    error = None
+
+    try:
+        call = CallRecord(
+            destination=data['destination'],
+            call_start_date=data['call_start_date'],
+            call_start_time=data['call_start_time'],
+            call_duration=data['call_duration'],
+            call_price=data['call_price'],
+            bill=data['bill']
+        )
+
+        current_app.db.session.add(call)
+        current_app.db.session.commit()
+
+        return call, error
+    except Exception:
+        current_app.db.session.remove()
+        current_app.db.session.rollback()
+
+        err_msg = {
+            'database_error': [
+                'Err: Something wents wrong while inserting into database']
+        }
+
+        return None, err_msg

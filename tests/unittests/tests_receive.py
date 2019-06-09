@@ -1,5 +1,4 @@
 from flask import url_for
-from datetime import datetime
 from unittest.mock import patch
 
 from tests_class import BaseRouteTests
@@ -25,12 +24,11 @@ class TestsReceiveRoute(BaseRouteTests):
                          expected['record_type'])
 
     def tests_receive_should_respond_400_when_dest_phone_is_incorrect(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 0,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
                 'origin_phone': '1231231231',
                 'dest_phone': '0'}
@@ -44,12 +42,11 @@ class TestsReceiveRoute(BaseRouteTests):
         self.assertEqual(request.json['dest_phone'], expected['dest_phone'])
 
     def tests_receive_should_respond_400_when_origin_phone_is_incorrect(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 0,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
                 'origin_phone': '0',
                 'dest_phone': '1231231231'}
@@ -66,12 +63,11 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
     def tests_receive_data_should_respond_201_when_payload_is_correct(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 0,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
                 'origin_phone': '1234567891',
                 'dest_phone': '12345678911'}
@@ -79,12 +75,11 @@ class TestsReceiveRoute(BaseRouteTests):
         self.assertEqual(request.status_code, 201)
 
     def test_receive_data_should_respond_400_when_record_type_incorrect(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 2,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
                 'origin_phone': '1234567891',
                 'dest_phone': '12345678911'}
@@ -96,12 +91,11 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
     def test_respond_400_with_origin_phone_field_and_call_end_record(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 1,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
                 'origin_phone': '1234567891'
             }
@@ -113,12 +107,11 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
     def test_respond_400_with_dest_phone_field_and_call_end_record(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 1,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
                 'dest_phone': '1234567891'
             }
@@ -130,24 +123,22 @@ class TestsReceiveRoute(BaseRouteTests):
         )
 
     def test_should_responde_201_when_no_phone_with_end_call(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 1,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
             }
         )
         self.assertEqual(request.status_code, 201)
 
     def test_should_respond_400_when_no_phone_with_start_call(self):
-        date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
         request = self.client.post(
             url_for('receive.receive_data'),
             json={
                 'record_type': 0,
-                'record_timestamp': date,
+                'record_timestamp': self.date_test,
                 'call_identifier': 30,
             }
         )
@@ -156,3 +147,31 @@ class TestsReceiveRoute(BaseRouteTests):
 
         self.assertEqual(request.status_code, 400)
         self.assertEqual(request.json['phone_validation'][0], expected)
+
+    @patch('call_receiver.controllers.routes.receive.save_call')
+    def test_should_call_save_data_function(self, save_mock):
+        save_mock.return_value = (True, False)
+
+        self.client.post(
+            url_for('receive.receive_data'),
+            json={
+                'record_type': 1,
+                'record_timestamp': self.date_test,
+                'call_identifier': 30,
+            }
+        )
+        self.assertTrue(save_mock.called)
+
+    @patch('call_receiver.controllers.routes.receive.save_call')
+    def test_should_return_400_when_error_occurs_in_save_call(self, save_mock):
+        save_mock.return_value = (True, True)
+
+        request = self.client.post(
+            url_for('receive.receive_data'),
+            json={
+                'record_type': 1,
+                'record_timestamp': self.date_test,
+                'call_identifier': 30,
+            }
+        )
+        self.assertEqual(request.status_code, 400)

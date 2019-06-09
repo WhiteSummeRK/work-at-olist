@@ -1,6 +1,6 @@
 """Tables module"""
 from flask_sqlalchemy import SQLAlchemy
-
+from datetime import timedelta, date
 db = SQLAlchemy()
 
 
@@ -32,6 +32,14 @@ class CallRecord(db.Model):
 class Bill(db.Model):
     __tablename__ = 'bill'
 
+    def create_period():
+        today = date.today()
+        first = today.replace(day=1)
+        lastMonth = first - timedelta(days=1)
+        return lastMonth.strftime("%Y/%m/%d")
+
     id = db.Column(db.Integer, primary_key=True)
     sub_number = db.Column(db.String(12))
-    reference_period = db.Column(db.DateTime, nullable=True)
+    reference_period = db.Column(db.String(10),
+                                 nullable=False,
+                                 default=create_period())
