@@ -75,6 +75,54 @@ class BaseModulesTest(TestCase):
 
         self.assertEqual(result, price)
 
+    def test_calculate_price_should_return_correct_after_22h(self):
+        price = 0.45
+        _21_58_10 = 1560733090
+        _22_01_10 = 1560733270
+
+        result = calculate_price(
+            calculate_duration(_22_01_10, _21_58_10, return_delta=True),
+            _21_58_10, _22_01_10
+        )
+
+        self.assertEqual(result, price)
+
+    def test_calculate_price_should_return_correct_before_6h(self):
+        price = 0.54
+        _05_58_00 = 1560675480
+        _06_10_00 = 1560676200
+
+        result = calculate_price(
+            calculate_duration(_06_10_00, _05_58_00, return_delta=True),
+            _05_58_00, _06_10_00
+        )
+
+        self.assertEqual(result, price)
+
+    def test_calculate_price_should_return_correct_when_all_after_22(self):
+        price = 0.36
+        _22_13_00 = 1560820380
+        _22_23_00 = 1560820980
+
+        result = calculate_price(
+            calculate_duration(_22_23_00, _22_13_00, return_delta=True),
+            _22_13_00, _22_23_00
+        )
+
+        self.assertEqual(result, price)
+
+    def test_calculate_price_should_return_when_call_has_less_then_a_min(self):
+        price = 0.36
+        _13_30_00 = 1560789000
+        _13_30_59 = 1560789059
+
+        result = calculate_price(
+            calculate_duration(_13_30_59, _13_30_00, return_delta=True),
+            _13_30_00, _13_30_59
+        )
+
+        self.assertEqual(result, price)
+
     def test_save_call_function_should_save_data_into_database(self):
         result = save_call({
             "destination": "1234567891",

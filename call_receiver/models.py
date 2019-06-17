@@ -33,6 +33,7 @@ class Bill(db.Model):
     __tablename__ = 'bill'
 
     def create_period():
+        """Get the las day of the last month."""
         today = date.today()
         first = today.replace(day=1)
         lastMonth = first - timedelta(days=1)
