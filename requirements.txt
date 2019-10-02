@@ -4,6 +4,7 @@ Flask-Migrate
 Flask-SQLAlchemy
 Flask-Testing
 marshmallow-sqlalchemy
+marshmallow
 SQLAlchemy
 psycopg2-binary
 tox

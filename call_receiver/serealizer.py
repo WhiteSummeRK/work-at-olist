@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_marshmallow import Marshmallow
 from marshmallow.validate import Length, OneOf
-from marshmallow import validates, ValidationError, validates_schema, fields, pre_load
+from marshmallow import validates, ValidationError, fields, validates_schema
 
 from call_receiver.models import CallRecord, Bill
 
@@ -46,8 +46,8 @@ class PhoneCallReceive(ma.Schema):
         )
     )
 
-    @pre_load
-    def check_phone_numbers(self, data):
+    @validates_schema
+    def check_phone_numbers(self, data, **kwargs):
         dest_status = 'dest_phone' in data.keys()
         orig_status = 'origin_phone' in data.keys()
         record_type = data.get('record_type')
